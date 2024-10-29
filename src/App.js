@@ -13,7 +13,7 @@ const App = () => {
     correctDropIndex: null,
     wrongDropIndex: null,
     isCorrect: false,
-    usedWords: [], // Trạng thái mới để theo dõi từ đã sử dụng
+    usedWords: [],
   });
 
   useEffect(() => {
@@ -54,7 +54,7 @@ const App = () => {
       const newAnswers = [...state.answers];
       newAnswers[index] = dragWords[draggingWord].word;
 
-      // Cập nhật usedWords để thêm từ đã sử dụng
+      
       updateState({
         answers: newAnswers,
         inputDisabled: state.inputDisabled.map((disabled, i) => (i === index ? true : disabled)),
@@ -111,7 +111,6 @@ const App = () => {
       </p>
       <div className="flex space-x-2 mt-4 gap-[10px]">
         {state.dragWords.map((word, index) => {
-          // Ẩn từ đã được sử dụng
           if (state.usedWords.includes(word.word)) return null;
           return (
             <motion.div
