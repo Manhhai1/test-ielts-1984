@@ -15,26 +15,25 @@ const App = () => {
     isCorrect: false,
     usedWords: [],
   });
+  const loadData = async () => {
+    try {
+      const res = await fetch('/api/data.json');
+      const json = await res.json();
+      const { paragraph, blanks, dragWords } = json.question;
+      setState({
+        ...state,
+        paragraph,
+        blanks,
+        dragWords,
+        answers: Array(blanks.length).fill(''),
+        inputDisabled: Array(blanks.length).fill(false),
+      });
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const res = await fetch('/api/data.json');
-        const json = await res.json();
-        const { paragraph, blanks, dragWords } = json.question;
-        setState({
-          ...state,
-          paragraph,
-          blanks,
-          dragWords,
-          answers: Array(blanks.length).fill(''),
-          inputDisabled: Array(blanks.length).fill(false),
-        });
-      } catch (error) {
-        console.error("Failed to load data:", error);
-      }
-    };
-
     loadData();
   }, []);
 
@@ -117,7 +116,8 @@ const App = () => {
               key={word.id}
               draggable
               onDragStart={() => handleDragStart(index)}
-              className={`text-${word.color}-500 p-2 rounded cursor-pointer bg-[#FF9D3D]`}
+              style={{ color: word.color }}
+              className={`p-2 rounded cursor-pointer bg-[#FF9D3D]`}
               animate={{
                 x: state.wrongDropIndex === index ? [-10, 10, -10, 0] : 0,
                 scale: state.correctDropIndex === index ? [0, 5, 0] : 1,
