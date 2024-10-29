@@ -15,6 +15,7 @@ const App = () => {
     isCorrect: false,
     usedWords: [],
   });
+
   const loadData = async () => {
     try {
       const res = await fetch('/api/data.json');
@@ -53,19 +54,18 @@ const App = () => {
       const newAnswers = [...state.answers];
       newAnswers[index] = dragWords[draggingWord].word;
 
-      
       updateState({
         answers: newAnswers,
         inputDisabled: state.inputDisabled.map((disabled, i) => (i === index ? true : disabled)),
         correctDropIndex: index,
-        
       });
 
       setTimeout(() => {
         updateState({
           correctDropIndex: null,
-          usedWords: [...usedWords, dragWords[draggingWord].word], 
-      })}, 600);
+          usedWords: [...usedWords, dragWords[draggingWord].word],
+        });
+      }, 600);
     } else {
       updateState({ wrongDropIndex: draggingWord });
       setTimeout(() => updateState({ wrongDropIndex: null }), 1000);
@@ -77,6 +77,14 @@ const App = () => {
     updateState({ draggingWord: index });
   };
 
+  const handleTouchStart = (index) => {
+    updateState({ draggingWord: index });
+  };
+
+  const handleTouchEnd = (index) => {
+    handleDrop(index);
+  };
+
   const handleSubmit = () => {
     const correctAnswers = state.blanks.map(b => b.correctAnswer).join(',');
     const isCorrect = state.answers.join(',') === correctAnswers;
@@ -85,12 +93,13 @@ const App = () => {
       isCorrect,
     });
   };
+
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
       <h1 className="text-2xl font-bold mb-4">Kéo và thả từ vào đúng chỗ trống</h1>
       <p className="text-lg">
         {state.paragraph.split('[_input]').map((part, index) => (
-          <span key={index} >
+          <span key={index}>
             <span dangerouslySetInnerHTML={{ __html: part }}></span>
             {index < state.blanks.length && (
               <input
@@ -103,6 +112,7 @@ const App = () => {
                 onDragOver={(e) => e.preventDefault()}
                 disabled={state.inputDisabled[index]}
                 onChange={(e) => handleChange(index, e)}
+                onTouchEnd={() => handleDrop(index)} // Handle touch end for input
               />
             )}
           </span>
@@ -116,6 +126,7 @@ const App = () => {
               key={word.id}
               draggable
               onDragStart={() => handleDragStart(index)}
+              onTouchStart={() => handleTouchStart(index)} // Handle touch start
               style={{ color: word.color }}
               className={`p-2 rounded cursor-pointer bg-[#FF9D3D]`}
               animate={{
