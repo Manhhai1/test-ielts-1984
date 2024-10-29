@@ -16,25 +16,26 @@ const App = () => {
     usedWords: [],
   });
 
-  const loadData = async () => {
-    try {
-      const res = await fetch('/api/data.json');
-      const json = await res.json();
-      const { paragraph, blanks, dragWords } = json.question;
-      setState({
-        ...state,
-        paragraph,
-        blanks,
-        dragWords,
-        answers: Array(blanks.length).fill(''),
-        inputDisabled: Array(blanks.length).fill(false),
-      });
-    } catch (error) {
-      console.error("Failed to load data:", error);
-    }
-  };
-
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        const res = await fetch('/api/data.json');
+        const json = await res.json();
+        const { paragraph, blanks, dragWords } = json.question;
+
+        setState((prevState) => ({
+          ...prevState,
+          paragraph,
+          blanks,
+          dragWords,
+          answers: Array(blanks.length).fill(''),
+          inputDisabled: Array(blanks.length).fill(false),
+        }));
+      } catch (error) {
+        console.error("Failed to load data:", error);
+      }
+    };
+
     loadData();
   }, []);
 
@@ -48,7 +49,7 @@ const App = () => {
     updateState({ answers: newAnswers });
   };
 
-  const handleDrop = (index) => {
+  const handleTouchEnd = (index) => {
     const { draggingWord, dragWords, blanks, usedWords } = state;
     if (draggingWord !== null && dragWords[draggingWord].word === blanks[index].correctAnswer) {
       const newAnswers = [...state.answers];
@@ -77,13 +78,7 @@ const App = () => {
     updateState({ draggingWord: index });
   };
 
-  const handleTouchStart = (index) => {
-    updateState({ draggingWord: index });
-  };
-
-  const handleTouchEnd = (index) => {
-    handleDrop(index);
-  };
+  
 
   const handleSubmit = () => {
     const correctAnswers = state.blanks.map(b => b.correctAnswer).join(',');
@@ -104,15 +99,12 @@ const App = () => {
             {index < state.blanks.length && (
               <input
                 type="text"
-                className={`w-[120px] focus:outline-none border-b-2 border-gray-400 px-2 cursor-pointer transition-colors duration-300 ${
-                  state.inputDisabled[index] ? 'bg-gray-200 text-gray-600' : 'hover:bg-gray-200'
-                }`}
+                className={`w-[120px] focus:outline-none border-b-2 border-gray-400 px-2 cursor-pointer transition-colors duration-300 ${state.inputDisabled[index] ? 'bg-gray-200 text-gray-600' : 'hover:bg-gray-200'}`}
                 value={state.answers[index]}
-                onDrop={() => handleDrop(index)}
+                onDrop={() => handleTouchEnd(index)}
                 onDragOver={(e) => e.preventDefault()}
                 disabled={state.inputDisabled[index]}
                 onChange={(e) => handleChange(index, e)}
-                onTouchEnd={() => handleDrop(index)} // Handle touch end for input
               />
             )}
           </span>
@@ -126,7 +118,8 @@ const App = () => {
               key={word.id}
               draggable
               onDragStart={() => handleDragStart(index)}
-              onTouchStart={() => handleTouchStart(index)} // Handle touch start
+              onTouchStart={() => handleDragStart(index)} 
+              onTouchEnd={() => handleTouchEnd(index)} 
               style={{ color: word.color }}
               className={`p-2 rounded cursor-pointer bg-[#FF9D3D]`}
               animate={{
