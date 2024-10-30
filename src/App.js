@@ -14,6 +14,7 @@ const App = () => {
     wrongDropIndex: null,
     isCorrect: false,
     usedWords: [],
+    draggingColor: '', 
   });
 
   useEffect(() => {
@@ -49,7 +50,7 @@ const App = () => {
     updateState({ answers: newAnswers });
   };
 
-  const handleTouchEnd = (index) => {
+  const handleDrop = (index) => {
     const { draggingWord, dragWords, blanks, usedWords } = state;
     if (draggingWord !== null && dragWords[draggingWord].word === blanks[index].correctAnswer) {
       const newAnswers = [...state.answers];
@@ -59,6 +60,7 @@ const App = () => {
         answers: newAnswers,
         inputDisabled: state.inputDisabled.map((disabled, i) => (i === index ? true : disabled)),
         correctDropIndex: index,
+        draggingColor: '', 
       });
 
       setTimeout(() => {
@@ -75,10 +77,9 @@ const App = () => {
   };
 
   const handleDragStart = (index) => {
-    updateState({ draggingWord: index });
+    updateState({ draggingWord: index, draggingColor: '#ff5c00' }); 
   };
 
-  
 
   const handleSubmit = () => {
     const correctAnswers = state.blanks.map(b => b.correctAnswer).join(',');
@@ -101,9 +102,10 @@ const App = () => {
                 type="text"
                 className={`w-[120px] focus:outline-none border-b-2 border-gray-400 px-2 cursor-pointer transition-colors duration-300 ${state.inputDisabled[index] ? 'bg-gray-200 text-gray-600' : 'hover:bg-gray-200'}`}
                 value={state.answers[index]}
-                onDrop={() => handleTouchEnd(index)}
+                onDrop={() => handleDrop(index)}
                 onDragOver={(e) => e.preventDefault()}
                 disabled={state.inputDisabled[index]}
+                onTouchEnd={() => handleDrop(index)} 
                 onChange={(e) => handleChange(index, e)}
               />
             )}
@@ -119,9 +121,8 @@ const App = () => {
               draggable
               onDragStart={() => handleDragStart(index)}
               onTouchStart={() => handleDragStart(index)} 
-              onTouchEnd={() => handleTouchEnd(index)} 
-              style={{ color: word.color }}
-              className={`p-2 rounded cursor-pointer bg-[#FF9D3D]`}
+              style={{ color: word.color, backgroundColor: state.draggingWord === index ? state.draggingColor : '#FF9D3D' }} // Thay đổi màu sắc
+              className={`p-2 rounded cursor-pointer`}
               animate={{
                 x: state.wrongDropIndex === index ? [-10, 10, -10, 0] : 0,
                 scale: state.correctDropIndex === index ? [0, 5, 0] : 1,
